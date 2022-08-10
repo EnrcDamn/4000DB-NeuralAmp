@@ -1,0 +1,12 @@
+*.wav
+*.ipynb
+
+venv/
+__pycache__
+
+**/Builds
+**/JuceLibraryCode
+Resources/
+models/
+
+.vscode/

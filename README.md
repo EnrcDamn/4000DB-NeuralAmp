@@ -1,2 +1,7 @@
-# Neural-ReelSaturator
-Guitar plugin using neural network to emulate the pre-amp section of an old Akai reel-to-reel tape machine
+# Neural Reel Saturator
+-Work in progress-
+
+## Content
+
+- Model
+- Plugin

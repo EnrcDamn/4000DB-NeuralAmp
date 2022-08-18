@@ -59,3 +59,7 @@ class Network(nn.Module):
         out = self.linear(x)
         
         return out
+
+if __name__ == "__main__":
+    model = Network()
+    

@@ -25,7 +25,7 @@ def audio_converter(audio):
     if audio.dtype == 'int16':
         return audio.astype(np.float32, order='C') / 32768.0
     else:
-        print('unimplemented audio data type conversion...')
+        print('Unimplemented audio data type conversion...')
 
 
 def audio_splitter(audio, split_markers):

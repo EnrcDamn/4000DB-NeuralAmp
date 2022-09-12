@@ -3,10 +3,11 @@ from torch import nn
 from torch.utils.data import DataLoader
 from model import Network
 import numpy as np
+import data_processing
 
 name = 'test'
-in_file = 'data/ac30_test1_in_FP32.wav'
-out_file = 'data/ac30_test1_out_FP32.wav'
+input_file = 'Model/Data/input_FP32.wav'
+output_file = '/Data/output_FP32.wav'
 epochs = 60
 batch_size = 4096
 test_size = 0.2
@@ -38,27 +39,7 @@ if __name__ == "__main__":
         device = "cpu"
     print(f"Using {device} device")
 
-    # data = 
-    train_data_loader = create_data_loader(train_data=data, batch_size=batch_size)
+    data = data_processing.Dataset(data_dir='', extensions='')
+    data.load_file(input_file, set_names='data')
 
-    # build model
-    model = Network().to(device)
-
-    # instantiate loss funcion and optimiser
-    loss_fn = nn.CrossEntropyLoss()
-    optimiser = torch.optim.Adam(model.parameters(),
-                                 lr = learning_rate)
-
-    # train model
-    train(
-        model,
-        train_data_loader,
-        loss_fn,
-        optimiser,
-        device,
-        epochs
-    )
-
-    # save the model
-    torch.save(model.state_dict(), "model.pth")
-    print("Trained model is stored at model.pth")
+    print(data)

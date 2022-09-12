@@ -9,12 +9,51 @@ import numpy as np
 import math
 import warnings
 
-
 class Dataset:
-    def __init__(self, data_dir):
+    def __init__(self, data_dir='../Data/', extensions=('input', 'target')):
+        self.extensions = extensions if extensions else ['']
+        self.subsets = {}
+        assert type(data_dir) == str, "data_dir should be string,not %r" % {type(data_dir)}
         self.data_dir = data_dir
-        pass
+        self.data = {}
+        self.frame_len = None
+        self.fs = None
 
+    # load a file of 'filename' into existing subset/s 'set_names', split fractionally as specified by 'splits',
+    # if 'cond_val' is provided the conditioning value will be saved along with the frames of the loaded data
+    def load_file(self, filename, set_names='train', splits=None, cond_val=None):
+        # Assertions and checks
+        if type(set_names) == str:
+            set_names = [set_names]
+        assert len(set_names) == 1 or len(set_names) == len(splits), "number of subset names must equal number of " \
+                                                                     "split markers"
+        assert [self.subsets.get(each) for each in set_names], "set_names contains subsets that don't exist yet"
+        
+        for i, ext in enumerate(self.extensions):
+            try:
+                fs, np_data = wavfile.read(filename)
+                print(fs)
+            except FileNotFoundError:
+                print(["File Not Found At: " + self.data_dir + filename])
+                return
+            raw_audio = audio_converter(np_data)
+            # Split the audio if the set_names were provided
+            if len(set_names) > 1:
+                raw_audio = audio_splitter(raw_audio, splits)
+                for n, sets in enumerate(set_names):
+                    self.subsets[set_names[n]] = self.add_data(raw_audio[n], fs, ext, cond_val)
+            elif len(set_names) == 1:
+                self.subsets[set_names[0]] = self.add_data(raw_audio, fs, ext, cond_val)
+    
+    # Add 'audio' data, in the data dictionary at the key 'ext', if cond_val is provided save the cond_val of each frame
+    def add_data(self, data, fs, audio, ext):
+        # if no 'ext' is provided, all the subsets data will be stored at the 'data' key of the 'data' dict
+        ext = 'data' if not ext else ext
+        # Frame the data and optionally create a tensor of the conditioning values of each frame
+        framed_data = framify(data, self.frame_len)
+        data = list(self.data[ext])
+        self.data[ext] = (torch.cat((data[0], framed_data), 1),)
+        return self.data[ext]
 
 def audio_converter(audio):
     '''
@@ -24,6 +63,8 @@ def audio_converter(audio):
     '''
     if audio.dtype == 'int16':
         return audio.astype(np.float32, order='C') / 32768.0
+    elif audio.dtype == 'float32':
+        return audio
     else:
         print('Unimplemented audio data type conversion...')
 
@@ -50,33 +91,18 @@ def audio_splitter(audio, split_markers):
 
 # TODO: REVIEW FRAMIFY FUNCTION
 # converts numpy audio into frames, and creates a torch tensor from them, frame_len = 0 just converts to a torch tensor
-def framify(audio, frame_len):
+def framify(audio, frame_len = 4096):
     # If audio is mono, add a dummy dimension, so the same operations can be applied to mono/multichannel audio
-    audio = np.expand_dims(audio, 1) if len(audio.shape) == 1 else audio
+    audio = np.expand_dims(audio, 1) if len(audio) == 1 else audio
     # Calculate the number of segments the training data will be split into in frame_len is not 0
-    seg_num = math.floor(audio.shape[0] / frame_len) if frame_len else 1
+    seg_num = math.floor(audio.size[0] / frame_len) if frame_len else 1
     # If no frame_len is provided, set frame_len to be equal to length of the input audio
-    frame_len = audio.shape[0] if not frame_len else frame_len
+    frame_len = audio.size if not frame_len else frame_len
     # Find the number of channels
-    channels = audio.shape[1]
+    channels = 1
     # Initialise tensor matrices
-    dataset = torch.empty((frame_len, seg_num, channels))
+    dataset = torch.empty((frame_len, seg_num))
     # Load the audio for the training set
     for i in range(seg_num):
-        dataset[:, i, :] = torch.from_numpy(audio[i * frame_len:(i + 1) * frame_len, :])
+        dataset[i, :] = torch.from_numpy(audio[i * frame_len:(i + 1) * frame_len])
     return dataset
-
-
-
-if __name__ == "__main__":
-
-    NAME = 'test'
-    IN_FILE = 'Model/Data/input_FP32.wav'
-    OUT_FILE = 'Model/Data/output_FP32.wav'
-
-    in_rate, in_data = wavfile.read(IN_FILE)
-    out_rate, out_data = wavfile.read(OUT_FILE)
-
-    if os.path.exists('models/' + NAME):
-        raise Exception("A model with the same name already exists. Please choose a new name.")
-    os.makedirs('models/' + NAME)

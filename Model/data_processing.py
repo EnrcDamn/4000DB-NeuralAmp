@@ -12,11 +12,14 @@ class Dataset:
 
     def process(self):
         in_rate, in_data = self.load_file(os.path.join(self.data_dir, self.in_filename))
+        out_rate, out_data = self.load_file(os.path.join(self.data_dir, self.out_filename))
+        assert in_rate == out_rate, "in_data and out_data must have same sample rate!"
         in_data = self.audio_converter(in_data)
-        # assert in_rate == out_rate, "in_data and out_data must have same sample rate"
+        out_data = self.audio_converter(out_data)
         # in_data = normalize(in_data)
-        in_data = self.audio_splitter(in_data)
-        return in_data
+        x_subset = self.audio_splitter(in_data, 'x')
+        y_subset = self.audio_splitter(out_data, 'y')
+        return x_subset, y_subset
 
     def load_file(self, filename):
         try:
@@ -49,7 +52,7 @@ class Dataset:
         data_norm = max(data_max,abs(data_min))
         return data / data_norm
 
-    def audio_splitter(self, audio):
+    def audio_splitter(self, audio, set_name):
         '''
         Splits audio.
         Lambda function will put 70% of audio in the first split (train set)
@@ -57,14 +60,9 @@ class Dataset:
         '''
         split = lambda d: np.split(d, [int(len(d) * 0.7), int(len(d) * 0.85)])
         slices = {}
-        slices["x_train"], slices["x_valid"], slices["x_test"] = split(audio)
-        slices["mean"], slices["std"] = slices["x_train"].mean(), slices["x_train"].std()
+        slices[set_name+"_train"], slices[set_name+"_valid"], slices[set_name+"_test"] = split(audio)
+        slices["mean"], slices["std"] = slices[set_name+"_train"].mean(), slices[set_name+"_train"].std()
         # standardize
-        for key in "x_train", "x_valid", "x_test":
+        for key in set_name+"_train", set_name+"_valid", set_name+"_test":
             slices[key] = (slices[key] - slices["mean"]) / slices["std"]
         return slices
-
-
-if __name__ == "__main__":
-    data = Dataset(in_filename='input_FP32.wav')
-    data.process()

@@ -1,5 +1,4 @@
 *.wav
-*.ipynb
 
 venv/
 __pycache__

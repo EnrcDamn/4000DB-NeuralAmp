@@ -11,37 +11,29 @@ class Network(nn.Module):
     Uses a stack of two 1-D Convolutional layers, followed by LSTM, followed by 
     a Linear (fully connected) layer.
     '''
-    def __init__(self, dilations, in_channels, out_channels, kernel_size,
-                num_classes, num_layers, input_size, hidden_size, seq_length):
+    def __init__(self):
         super().__init__()
-        self.num_classes = num_classes #number of classes
-        self.num_layers = num_layers #number of layers
-        self.input_size = input_size #input size
-        self.hidden_size = hidden_size #hidden state
-        self.seq_length = seq_length #sequence length
 
-        # 2 x 1d conv blocks -> LSTM -> linear
+        # 2 Conv1d blocks -> LSTM -> linear
 
         self.conv1 = nn.Conv1d(
-            in_channels = in_channels,
-            out_channels = out_channels * 2,
-            kernel_size = kernel_size,
+            in_channels = 1,
+            out_channels = 16,
+            kernel_size = 3,
             stride = 1,
-            padding = 0, 
-            dilation = dilations
+            padding = 0
             )
 
         self.conv2 = nn.Conv1d(
-            in_channels = in_channels,
-            out_channels = out_channels * 2,
-            kernel_size = kernel_size,
+            in_channels = 16,
+            out_channels = 32,
+            kernel_size = 3,
             stride = 1,
-            padding = 0, 
-            dilation = dilations
+            padding = 0
             )
 
         self.lstm = nn.LSTM(
-            input_size = input_size, 
+            input_size = 32, 
             hidden_size = hidden_size,
             num_layers = num_layers
             )
@@ -59,7 +51,3 @@ class Network(nn.Module):
         out = self.linear(x)
         
         return out
-
-if __name__ == "__main__":
-    model = Network()
-    

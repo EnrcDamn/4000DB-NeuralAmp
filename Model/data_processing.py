@@ -1,4 +1,5 @@
-﻿import os
+﻿from distutils import extension
+import os
 import torch
 from torch.utils.data import Dataset
 
@@ -10,40 +11,18 @@ import math
 import warnings
 
 class Dataset:
-    def __init__(self, data_dir='../Data/', extensions=('input', 'target')):
-        self.extensions = extensions if extensions else ['']
-        self.subsets = {}
-        assert type(data_dir) == str, "data_dir should be string,not %r" % {type(data_dir)}
+    def __init__(self, in_filename, out_filename='', data_dir='Model/Data/'):
         self.data_dir = data_dir
-        self.data = {}
-        self.frame_len = None
-        self.fs = None
+        self.in_filename = in_filename
+        self.out_filename = out_filename
 
-    # load a file of 'filename' into existing subset/s 'set_names', split fractionally as specified by 'splits',
-    # if 'cond_val' is provided the conditioning value will be saved along with the frames of the loaded data
-    def load_file(self, filename, set_names='train', splits=None, cond_val=None):
-        # Assertions and checks
-        if type(set_names) == str:
-            set_names = [set_names]
-        assert len(set_names) == 1 or len(set_names) == len(splits), "number of subset names must equal number of " \
-                                                                     "split markers"
-        assert [self.subsets.get(each) for each in set_names], "set_names contains subsets that don't exist yet"
-        
-        for i, ext in enumerate(self.extensions):
-            try:
-                fs, np_data = wavfile.read(filename)
-                print(fs)
-            except FileNotFoundError:
-                print(["File Not Found At: " + self.data_dir + filename])
-                return
-            raw_audio = audio_converter(np_data)
-            # Split the audio if the set_names were provided
-            if len(set_names) > 1:
-                raw_audio = audio_splitter(raw_audio, splits)
-                for n, sets in enumerate(set_names):
-                    self.subsets[set_names[n]] = self.add_data(raw_audio[n], fs, ext, cond_val)
-            elif len(set_names) == 1:
-                self.subsets[set_names[0]] = self.add_data(raw_audio, fs, ext, cond_val)
+    def process(self):
+        in_rate, in_data = load_file(os.path.join(self.data_dir, self.in_filename))
+        in_data = audio_converter(in_data)
+        # in_data = normalize(in_data) # normalize in conversion above
+        # Split the audio if the set_names were provided
+        in_data = audio_splitter(in_data)
+        return in_data
     
     # Add 'audio' data, in the data dictionary at the key 'ext', if cond_val is provided save the cond_val of each frame
     def add_data(self, data, fs, audio, ext):
@@ -54,6 +33,15 @@ class Dataset:
         data = list(self.data[ext])
         self.data[ext] = (torch.cat((data[0], framed_data), 1),)
         return self.data[ext]
+
+
+def load_file(filename):
+    try:
+        file_rate, file_data = wavfile.read(filename)
+        return file_rate, file_data
+    except FileNotFoundError:
+        print(["File Not Found At: " + filename])
+        return
 
 def audio_converter(audio):
     '''
@@ -68,25 +56,23 @@ def audio_converter(audio):
     else:
         print('Unimplemented audio data type conversion...')
 
+def normalize(data):
+    data_max = max(data)
+    data_min = min(data)
+    data_norm = max(data_max,abs(data_min))
+    return data / data_norm
 
-def audio_splitter(audio, split_markers):
+def audio_splitter(audio):
     '''
     Splits audio.
-    Each split marker determines the fraction of the total audio in that split, 
-    i.e [0.75, 0.25] will put 75% in the first split and 25% in the second one.
+    Lambda function will put 70% of audio in the first split (train) and 85% in the second one (valid).
     '''
-    assert sum(split_markers) <= 1.0
-    if sum(split_markers) < 0.999:
-        warnings.warn("Sum of split markers is less than 1: some audio won't be included in the dataset")
-    start = 0
-    slices = []
-    # convert split markers to samples: [0.75, 0.25] -> [75k, 25k] for audio[0:100k]
-    split_samples = [int(marker * audio.shape[0]) for marker in split_markers]
-    for n in split_samples:
-        end = start + n
-        slices.append(audio[start:end])
-        start = end
-        # return [ [0, ..., 75k], [75k+1, ..., 100k] ]
+    split = lambda d: np.split(d, [int(len(d) * 0.7), int(len(d) * 0.85)])
+
+    slices = {}
+    slices["x_train"], slices["x_valid"], slices["x_test"] = split(audio)
+    slices["mean"], slices["std"] = slices["x_train"].mean(), slices["x_train"].std()
+    print(slices)
     return slices
 
 # TODO: REVIEW FRAMIFY FUNCTION
@@ -106,3 +92,8 @@ def framify(audio, frame_len = 4096):
     for i in range(seg_num):
         dataset[i, :] = torch.from_numpy(audio[i * frame_len:(i + 1) * frame_len])
     return dataset
+
+
+if __name__ == "__main__":
+    data = Dataset(in_filename='input_FP32.wav')
+    data.process()

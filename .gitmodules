@@ -1,3 +1,6 @@
 [submodule "Automated-GuitarAmpModelling"]
 	path = Automated-GuitarAmpModelling
 	url = https://github.com/EnrcDamn/Automated-GuitarAmpModelling
+[submodule "RTNeural"]
+	path = RTNeural
+	url = https://github.com/jatinchowdhury18/RTNeural

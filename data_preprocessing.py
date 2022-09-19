@@ -11,6 +11,7 @@ def collect_files(directory):
         for file in files:
             if file[-4:] == ".wav":
                 files_list.append(file)
+    print("Files successfully collected; starting processing...\n")
     return files_list
 
 def process(data_dir, files):
@@ -25,6 +26,7 @@ def process(data_dir, files):
         splitted_data = audio_splitter(data)
         save_wav(os.path.join(out_dir, file+'_train.wav'), rate, splitted_data['data_train'])
         save_wav(os.path.join(out_dir, file+'_test.wav'), rate, splitted_data['data_test'])
+    print("Processing successfully completed!\n")
 
 def load_file(filename):
     try:
@@ -68,8 +70,8 @@ def audio_splitter(data):
     slices["data_train"], slices["data_valid"], slices["data_test"] = split(data)
     slices["mean"], slices["std"] = slices["data_train"].mean(), slices["data_train"].std()
     # standardize
-    # for key in set_name+"_train", set_name+"_valid", set_name+"_test":
-    #     slices[key] = (slices[key] - slices["mean"]) / slices["std"]
+    for key in "data_train", "data_valid", "data_test":
+        slices[key] = (slices[key] - slices["mean"]) / slices["std"]
     return slices
 
 def save_wav(name, rate, data):

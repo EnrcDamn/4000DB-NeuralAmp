@@ -2,31 +2,31 @@
 from scipy.io import wavfile
 import numpy as np
 
-IN_FILE = "4000DB-dry"
-OUT_FILE = "4000DB-100"
-DATA_DIR='Model/Data/'
+def collect_files(directory):
+    files_list = []
+    assert(directory)
+    if not os.path.exists(directory):
+        raise FileNotFoundError("Data folder not found: maybe wrong name?")
+    for _, _, files in os.walk(directory):
+        for file in files:
+            if file[-4:] == ".wav":
+                files_list.append(file)
+    return files_list
 
-def __init__(self, in_filename, out_filename, data_dir='Model/Data/'):
-    self.data_dir = data_dir
-    self.in_filename = in_filename
-    self.out_filename = out_filename
+def process(data_dir, files):
+    out_dir = "./Data/processed/"
+    if not os.path.exists(out_dir):
+        os.mkdir(out_dir)
+    for file in files:
+        file = file[:-4] # parse filename from ".wav" extension
+        rate, data = load_file(os.path.join(data_dir, file+'.wav'))
+        data = audio_converter(data)
+        data = normalize(data)
+        splitted_data = audio_splitter(data)
+        save_wav(os.path.join(out_dir, file+'_train.wav'), rate, splitted_data['data_train'])
+        save_wav(os.path.join(out_dir, file+'_test.wav'), rate, splitted_data['data_test'])
 
-def process(self):
-    in_rate, in_data = self.load_file(os.path.join(self.data_dir, self.in_filename+'.wav'))
-    out_rate, out_data = self.load_file(os.path.join(self.data_dir, self.out_filename+'.wav'))
-    assert in_rate == out_rate, "in_data and out_data must have same sample rate!"
-    #in_data = self.audio_converter(in_data)
-    #out_data = self.audio_converter(out_data)
-    # in_data = normalize(in_data)
-    x_subset = self.audio_splitter(in_data, 'x')
-    y_subset = self.audio_splitter(out_data, 'y')
-    self.save_wav('Model/processed/'+self.in_filename+'_train.wav', in_rate, x_subset['x_train'])
-    self.save_wav('Model/processed/'+self.in_filename+'_test.wav', in_rate, x_subset['x_test'])
-    self.save_wav('Model/processed/'+self.out_filename+'_train.wav', out_rate, y_subset['y_train'])
-    self.save_wav('Model/processed/'+self.out_filename+'_test.wav', out_rate, y_subset['y_test'])
-    return x_subset, y_subset
-
-def load_file(self, filename):
+def load_file(filename):
     try:
         file_rate, file_data = wavfile.read(filename)
         return file_rate, file_data
@@ -34,7 +34,7 @@ def load_file(self, filename):
         print(["File Not Found At: " + filename])
         return
 
-def audio_converter(self, audio):
+def audio_converter(audio):
     '''
     Converts raw binary int16 data to float32. 
     Floating point audio data is normalized to the range of [-1.0, 1.0],
@@ -47,7 +47,7 @@ def audio_converter(self, audio):
     else:
         print('Unimplemented audio data type conversion...')
 
-def normalize(self, data):
+def normalize(data):
     '''
     Normalizes data to the range of [-1.0, 1.0].
     Unused at the moment.
@@ -57,7 +57,7 @@ def normalize(self, data):
     data_norm = max(data_max,abs(data_min))
     return data / data_norm
 
-def audio_splitter(self, audio, set_name):
+def audio_splitter(data):
     '''
     Splits audio.
     Lambda function will put 70% of audio in the first split (train set)
@@ -65,16 +65,17 @@ def audio_splitter(self, audio, set_name):
     '''
     split = lambda d: np.split(d, [int(len(d) * 0.8), int(len(d) * 0.85)])
     slices = {}
-    slices[set_name+"_train"], slices[set_name+"_valid"], slices[set_name+"_test"] = split(audio)
-    slices["mean"], slices["std"] = slices[set_name+"_train"].mean(), slices[set_name+"_train"].std()
+    slices["data_train"], slices["data_valid"], slices["data_test"] = split(data)
+    slices["mean"], slices["std"] = slices["data_train"].mean(), slices["data_train"].std()
     # standardize
     # for key in set_name+"_train", set_name+"_valid", set_name+"_test":
     #     slices[key] = (slices[key] - slices["mean"]) / slices["std"]
     return slices
 
-def save_wav(self, name, rate, data):
+def save_wav(name, rate, data):
     wavfile.write(name, rate, data.astype(np.float32))
 
 if __name__ == "__main__":
-    data = Dataset(in_filename=IN_FILE, out_filename=OUT_FILE)
-    x, y = data.process()
+    DATA_DIR='./Data/'
+    files = collect_files(DATA_DIR)
+    process(DATA_DIR, files)

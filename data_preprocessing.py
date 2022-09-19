@@ -70,8 +70,8 @@ def audio_splitter(data):
     slices["data_train"], slices["data_valid"], slices["data_test"] = split(data)
     slices["mean"], slices["std"] = slices["data_train"].mean(), slices["data_train"].std()
     # standardize
-    for key in "data_train", "data_valid", "data_test":
-        slices[key] = (slices[key] - slices["mean"]) / slices["std"]
+    # for key in "data_train", "data_valid", "data_test":
+    #     slices[key] = (slices[key] - slices["mean"]) / slices["std"]
     return slices
 
 def save_wav(name, rate, data):

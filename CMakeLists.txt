@@ -34,6 +34,7 @@ juce_generate_juce_header(${PROJECT_NAME})
 add_subdirectory(Source)
 include_directories(Source)
 add_subdirectory(Resources)
+add_subdirectory(RTNeural)
 
 # Build LV2 only on Linux
 if(UNIX AND NOT APPLE)
@@ -50,7 +51,10 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
     JUCE_VST3_CAN_REPLACE_VST2=0)
 
 
-target_link_libraries (${PROJECT_NAME} PRIVATE
+target_link_libraries (${PROJECT_NAME}
+    LINK_PUBLIC 
+    RTNeural
+    PRIVATE 
     # JUCE Modules
     juce::juce_audio_processors
     juce::juce_audio_plugin_client

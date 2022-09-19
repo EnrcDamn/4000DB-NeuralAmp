@@ -51,10 +51,7 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
     JUCE_VST3_CAN_REPLACE_VST2=0)
 
 
-target_link_libraries (${PROJECT_NAME}
-    LINK_PUBLIC 
-    RTNeural
-    PRIVATE 
+target_link_libraries (${PROJECT_NAME} PRIVATE 
     # JUCE Modules
     juce::juce_audio_processors
     juce::juce_audio_plugin_client
@@ -65,3 +62,6 @@ target_link_libraries (${PROJECT_NAME}
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags
     juce::juce_recommended_config_flags)
+
+
+target_link_libraries(${PROJECT_NAME} LINK_PUBLIC RTNeural)

@@ -93,8 +93,7 @@ void NeuralReelSaturatorAudioProcessor::changeProgramName (int index, const juce
 //==============================================================================
 void NeuralReelSaturatorAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+    LSTM.reset();
 }
 
 void NeuralReelSaturatorAudioProcessor::releaseResources()

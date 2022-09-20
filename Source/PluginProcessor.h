@@ -9,6 +9,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "RTNeuralLSTM.h"
 
 //==============================================================================
 /**
@@ -57,6 +58,14 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
 private:
+    float gainValue = 0.0;
+
+    bool lstm_state = true;
+
+    RT_LSTM LSTM;
+
+    juce::AudioProcessorValueTreeState treeState;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NeuralReelSaturatorAudioProcessor)
 };

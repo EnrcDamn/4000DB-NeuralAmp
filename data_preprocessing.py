@@ -4,7 +4,6 @@ import numpy as np
 
 def collect_files(directory):
     files_list = []
-    assert(directory)
     if not os.path.exists(directory):
         raise FileNotFoundError("Data folder not found: maybe wrong name?")
     for _, _, files in os.walk(directory):

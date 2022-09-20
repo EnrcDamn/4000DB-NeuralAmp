@@ -80,3 +80,6 @@ if __name__ == "__main__":
     DATA_DIR='./Data/'
     files = collect_files(DATA_DIR)
     process(DATA_DIR, files)
+
+# TODO: fix "TypeError: cannot unpack non-iterable NoneType object"
+#       occurring when out_dir is already filled with processed audio

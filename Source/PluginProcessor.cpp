@@ -20,13 +20,13 @@ NeuralReelSaturatorAudioProcessor::NeuralReelSaturatorAudioProcessor()
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
                        ),
-                       treeState(*this,
-                                 nullptr,
-                                 "PARAMETER",
-                                 { std::make_unique<AudioParameterFloat>("Gain", "Gain", NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.5f) })
+                     treeState(*this,
+                                nullptr,
+                                "PARAMETER",
+                                { std::make_unique<AudioParameterFloat>(GAIN_ID, GAIN_NAME, NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.5f) })
 #endif
 {
-    gainParam = treeState.getRawParameterValue ("Gain");
+    gainParam = treeState.getRawParameterValue (GAIN_ID);
 }
 
 NeuralReelSaturatorAudioProcessor::~NeuralReelSaturatorAudioProcessor()
@@ -146,7 +146,7 @@ void NeuralReelSaturatorAudioProcessor::processBlock (juce::AudioBuffer<float>& 
 
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
-        LSTM.process(buffer.getReadPointer(channel), gainValue, buffer.getWritePointer(channel), (int)numSamples);
+        LSTM.process(buffer.getWritePointer(channel), gainValue, buffer.getWritePointer(channel), (int)numSamples);
     }
 }
 

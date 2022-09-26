@@ -10,6 +10,8 @@
 
 #include <JuceHeader.h>
 #include "RTNN.h"
+#define GAIN_ID "gain"
+#define GAIN_NAME "Gain"
 
 //==============================================================================
 /**
@@ -57,14 +59,15 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-private:
+    
+    juce::AudioProcessorValueTreeState treeState;
     float gainValue = 0.0;
 
+private:
+    std::atomic<float>* gainParam = nullptr;
     bool lstm_state = true;
 
     RT_LSTM LSTM;
-
-    juce::AudioProcessorValueTreeState treeState;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NeuralReelSaturatorAudioProcessor)

@@ -17,12 +17,15 @@ void RT_LSTM::prepareToPlay()
 
 void RT_LSTM::reset()
 {
-    model.reset();
+    modelT.reset();
 }
     
-void RT_LSTM::load_model(std::ifstream& model_json)
+void RT_LSTM::load_model()
 {
+    std::ifstream jsonStream("../Resources/model.json", std::ifstream::binary);
 
+    auto model = RTNeural::json_parser::parseJson<float>(jsonStream);
+    modelT.parseJson(jsonStream);
 }
 
 void RT_LSTM::process(const float* inData, float param1, float* outData, int numSamples)
@@ -47,7 +50,7 @@ void RT_LSTM::process(const float* inData, float param1, float* outData, int num
             inArray[1] = param1;
 
         // Run forward pass through neural network
-        outData[i] = model.forward(inArray) + inData[i];
+        outData[i] = modelT.forward(inArray) + inData[i];
     }
     previousParam1 = param1;
 }

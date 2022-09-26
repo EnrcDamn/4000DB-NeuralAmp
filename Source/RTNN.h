@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <../RTNeural/RTNeural/RTNeural.h>
+#include "../RTNeural/RTNeural/RTNeural.h"
 
 class RT_LSTM
 {
@@ -19,7 +19,7 @@ public:
 
     void reset();
 
-    void load_model(std::ifstream& model_json);
+    void load_model();
 
     void process(const float* inData, float param1, float* outData, int numSamples);
 
@@ -28,14 +28,10 @@ public:
     bool changedParam1 = false;
 
 private:
-    RTNeural::ModelT<float, 3, 1
+    RTNeural::ModelT<float, 3, 1, 
         RTNeural::LSTMLayerT<float, 3, 20>,
-        RTNeural::DenseT<double, 20, 1>
-    > model;
+        RTNeural::DenseT<float, 20, 1>
+    > modelT;
 
-    std::ifstream jsonStream("../Resources/model.json", std::ifstream::binary);
-    auto model = RTNeural::json_parser::parseJson<double>(jsonStream);
-    model.parseJson(jsonStream);
-    
     float inArray[3] = { 0.0, 0.0, 0.0 };
 };

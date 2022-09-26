@@ -25,7 +25,7 @@ juce_add_plugin(${PROJECT_NAME}
     PRODUCT_NAME "Akai4000DB-PreAmp")
 
 # Set language version
-target_compile_features (${PROJECT_NAME} PRIVATE cxx_std_14)
+target_compile_features (${PROJECT_NAME} PRIVATE cxx_std_17)
 
 # create a JuceHeader.h
 juce_generate_juce_header(${PROJECT_NAME})

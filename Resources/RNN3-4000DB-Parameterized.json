@@ -1,1 +1,0 @@
-{"hidden_size": 20, "unit_type": "LSTM", "loss_fcns": {"ESR": 0.95, "DC": 0.05}, "pre_filt": "high_pass", "device": "4000DB-Parameterized", "file_name": "4000DB-Parameterized"}

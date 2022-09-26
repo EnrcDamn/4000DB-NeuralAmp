@@ -33,7 +33,7 @@ juce_generate_juce_header(${PROJECT_NAME})
 # add sources
 add_subdirectory(Source)
 include_directories(Source)
-add_subdirectory(Resources)
+add_subdirectory(Models)
 add_subdirectory(RTNeural)
 
 # Build LV2 only on Linux

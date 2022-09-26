@@ -22,7 +22,7 @@ void RT_LSTM::reset()
     
 void RT_LSTM::load_model()
 {
-    std::ifstream jsonStream("../Resources/model.json", std::ifstream::binary);
+    std::ifstream jsonStream("../Models/model.json", std::ifstream::binary);
 
     auto model = RTNeural::json_parser::parseJson<float>(jsonStream);
     modelT.parseJson(jsonStream);

@@ -5,7 +5,6 @@ __pycache__
 
 **/Builds
 **/JuceLibraryCode
-models/
 cmake-build/
 JUCE/
 

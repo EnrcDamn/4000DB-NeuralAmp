@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <../RTNeural/RTNeural.h>
+#include <../RTNeural/RTNeural/RTNeural.h>
 
 class RT_LSTM
 {
@@ -33,7 +33,7 @@ private:
         RTNeural::DenseT<double, 20, 1>
     > model;
 
-    std::ifstream jsonStream("model.json", std::ifstream::binary);
+    std::ifstream jsonStream("../Resources/model.json", std::ifstream::binary);
     auto model = RTNeural::json_parser::parseJson<double>(jsonStream);
     model.parseJson(jsonStream);
     

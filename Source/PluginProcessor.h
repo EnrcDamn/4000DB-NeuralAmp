@@ -65,9 +65,10 @@ public:
 
 private:
     std::atomic<float>* gainParam = nullptr;
-    bool lstm_state = true;
+    //bool lstm_state = true;
 
-    RT_LSTM LSTM;
+    RT_LSTM lstmL;
+    RT_LSTM lstmR;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NeuralReelSaturatorAudioProcessor)

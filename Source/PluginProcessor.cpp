@@ -98,8 +98,11 @@ void NeuralReelSaturatorAudioProcessor::changeProgramName (int index, const juce
 //==============================================================================
 void NeuralReelSaturatorAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    LSTM.reset();
-    LSTM.load_model();
+    lstmL.reset();
+    lstmR.reset();
+
+    lstmL.load_model();
+    lstmR.load_model();
 }
 
 void NeuralReelSaturatorAudioProcessor::releaseResources()
@@ -146,7 +149,10 @@ void NeuralReelSaturatorAudioProcessor::processBlock (juce::AudioBuffer<float>& 
 
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
-        LSTM.process(buffer.getWritePointer(channel), gainValue, buffer.getWritePointer(channel), (int)numSamples);
+        if (channel == 0)
+            lstmL.process(buffer.getWritePointer(0), gainValue, buffer.getWritePointer(0), (int)numSamples);
+        else if (channel == 1)
+            lstmL.process(buffer.getWritePointer(1), gainValue, buffer.getWritePointer(1), (int)numSamples);
     }
 }
 

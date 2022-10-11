@@ -10,7 +10,7 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-NeuralReelSaturatorAudioProcessor::NeuralReelSaturatorAudioProcessor()
+NeuralAmpAudioProcessor::NeuralAmpAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
@@ -25,17 +25,17 @@ NeuralReelSaturatorAudioProcessor::NeuralReelSaturatorAudioProcessor()
 
 }
 
-NeuralReelSaturatorAudioProcessor::~NeuralReelSaturatorAudioProcessor()
+NeuralAmpAudioProcessor::~NeuralAmpAudioProcessor()
 {
 }
 
 //==============================================================================
-const juce::String NeuralReelSaturatorAudioProcessor::getName() const
+const juce::String NeuralAmpAudioProcessor::getName() const
 {
     return JucePlugin_Name;
 }
 
-bool NeuralReelSaturatorAudioProcessor::acceptsMidi() const
+bool NeuralAmpAudioProcessor::acceptsMidi() const
 {
    #if JucePlugin_WantsMidiInput
     return true;
@@ -44,7 +44,7 @@ bool NeuralReelSaturatorAudioProcessor::acceptsMidi() const
    #endif
 }
 
-bool NeuralReelSaturatorAudioProcessor::producesMidi() const
+bool NeuralAmpAudioProcessor::producesMidi() const
 {
    #if JucePlugin_ProducesMidiOutput
     return true;
@@ -53,7 +53,7 @@ bool NeuralReelSaturatorAudioProcessor::producesMidi() const
    #endif
 }
 
-bool NeuralReelSaturatorAudioProcessor::isMidiEffect() const
+bool NeuralAmpAudioProcessor::isMidiEffect() const
 {
    #if JucePlugin_IsMidiEffect
     return true;
@@ -62,49 +62,49 @@ bool NeuralReelSaturatorAudioProcessor::isMidiEffect() const
    #endif
 }
 
-double NeuralReelSaturatorAudioProcessor::getTailLengthSeconds() const
+double NeuralAmpAudioProcessor::getTailLengthSeconds() const
 {
     return 0.0;
 }
 
-int NeuralReelSaturatorAudioProcessor::getNumPrograms()
+int NeuralAmpAudioProcessor::getNumPrograms()
 {
     return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
                 // so this should be at least 1, even if you're not really implementing programs.
 }
 
-int NeuralReelSaturatorAudioProcessor::getCurrentProgram()
+int NeuralAmpAudioProcessor::getCurrentProgram()
 {
     return 0;
 }
 
-void NeuralReelSaturatorAudioProcessor::setCurrentProgram (int index)
+void NeuralAmpAudioProcessor::setCurrentProgram (int index)
 {
 }
 
-const juce::String NeuralReelSaturatorAudioProcessor::getProgramName (int index)
+const juce::String NeuralAmpAudioProcessor::getProgramName (int index)
 {
     return {};
 }
 
-void NeuralReelSaturatorAudioProcessor::changeProgramName (int index, const juce::String& newName)
+void NeuralAmpAudioProcessor::changeProgramName (int index, const juce::String& newName)
 {
 }
 
 //==============================================================================
-void NeuralReelSaturatorAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+void NeuralAmpAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
 
 }
 
-void NeuralReelSaturatorAudioProcessor::releaseResources()
+void NeuralAmpAudioProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-bool NeuralReelSaturatorAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+bool NeuralAmpAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
   #if JucePlugin_IsMidiEffect
     juce::ignoreUnused (layouts);
@@ -129,7 +129,7 @@ bool NeuralReelSaturatorAudioProcessor::isBusesLayoutSupported (const BusesLayou
 }
 #endif
 
-void NeuralReelSaturatorAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+void NeuralAmpAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
@@ -139,25 +139,25 @@ void NeuralReelSaturatorAudioProcessor::processBlock (juce::AudioBuffer<float>& 
 }
 
 //==============================================================================
-bool NeuralReelSaturatorAudioProcessor::hasEditor() const
+bool NeuralAmpAudioProcessor::hasEditor() const
 {
     return true; // (change this to false if you choose to not supply an editor)
 }
 
-juce::AudioProcessorEditor* NeuralReelSaturatorAudioProcessor::createEditor()
+juce::AudioProcessorEditor* NeuralAmpAudioProcessor::createEditor()
 {
-    return new NeuralReelSaturatorAudioProcessorEditor (*this);
+    return new NeuralAmpAudioProcessorEditor (*this);
 }
 
 //==============================================================================
-void NeuralReelSaturatorAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
+void NeuralAmpAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
 }
 
-void NeuralReelSaturatorAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+void NeuralAmpAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
@@ -167,5 +167,5 @@ void NeuralReelSaturatorAudioProcessor::setStateInformation (const void* data, i
 // This creates new instances of the plugin..
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-    return new NeuralReelSaturatorAudioProcessor();
+    return new NeuralAmpAudioProcessor();
 }

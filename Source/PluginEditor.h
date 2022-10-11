@@ -14,25 +14,20 @@
 //==============================================================================
 /**
 */
-class NeuralReelSaturatorAudioProcessorEditor  : public juce::AudioProcessorEditor,
-                                                 public juce::Slider::Listener
+class NeuralAmpAudioProcessorEditor  : public juce::AudioProcessorEditor
 {
 public:
-    NeuralReelSaturatorAudioProcessorEditor (NeuralReelSaturatorAudioProcessor&);
-    ~NeuralReelSaturatorAudioProcessorEditor() override;
+    NeuralAmpAudioProcessorEditor (NeuralAmpAudioProcessor&);
+    ~NeuralAmpAudioProcessorEditor() override;
 
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
-    void sliderValueChanged(juce::Slider* slider) override;
-
-    juce::ScopedPointer <juce::AudioProcessorValueTreeState::SliderAttachment> sliderAttach;
 
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
-    NeuralReelSaturatorAudioProcessor& audioProcessor;
-    juce::Slider gainSlider;
+    NeuralAmpAudioProcessor& audioProcessor;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NeuralReelSaturatorAudioProcessorEditor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NeuralAmpAudioProcessorEditor)
 };

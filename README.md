@@ -1,4 +1,4 @@
-# Neural Reel Saturator
+# Neural Amp and Distortion plugin - Akai 4000DB
 
 Guitar plugin made with JUCE, using black-box modelling with neural networks to reproduce the pre-amp section of my old Akai 4000DB reel-to-reel tape machine.
 
@@ -27,8 +27,8 @@ Prerequisites:
 
 Cloning the repository:
 ```
-git clone https://github.com/EnrcDamn/Neural-ReelSaturator.git
-cd ./Neural-ReelSaturator
+git clone https://github.com/EnrcDamn/4000DB-NeuralAmp.git
+cd ./4000DB-NeuralAmp
 git submodule update --init --recursive
 ```
 Move the audio files into a new `Data/` folder. Run this command to create the folder:
@@ -71,3 +71,10 @@ Training the model:
 python dist_model_recnet.py -l RNN3-4000DB-Parameterized -eps 175 --seed 39 -lm False -is 2 
 ```
 The LSTM layer needs to be configured with a hidden size of 20 (`./Automated-GuitarAmpModelling/Configs/RNN3-4000DB-Parameterized.json`). The training instructions must then be modified to included the extra inputs to the model as `-is <parameters + audio channels>`. That is, the number of inputs to the model must be the number of parameters plus the number of audio channels.
+
+
+## Build plugin
+```
+cmake -B cmake-build
+cmake --build cmake-build --config Release
+```

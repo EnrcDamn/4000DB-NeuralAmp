@@ -19,14 +19,10 @@ NeuralReelSaturatorAudioProcessor::NeuralReelSaturatorAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       ),
-                     treeState(*this,
-                                nullptr,
-                                "PARAMETER",
-                                { std::make_unique<AudioParameterFloat>(GAIN_ID, GAIN_NAME, NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.5f) })
+                       )
 #endif
 {
-    gainParam = treeState.getRawParameterValue (GAIN_ID);
+
 }
 
 NeuralReelSaturatorAudioProcessor::~NeuralReelSaturatorAudioProcessor()
@@ -98,11 +94,7 @@ void NeuralReelSaturatorAudioProcessor::changeProgramName (int index, const juce
 //==============================================================================
 void NeuralReelSaturatorAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    lstmL.reset();
-    lstmR.reset();
 
-    lstmL.load_model();
-    lstmR.load_model();
 }
 
 void NeuralReelSaturatorAudioProcessor::releaseResources()
@@ -144,16 +136,6 @@ void NeuralReelSaturatorAudioProcessor::processBlock (juce::AudioBuffer<float>& 
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
     const int numSamples = buffer.getNumSamples();
-
-    auto gainValue = static_cast<float> (gainParam->load());
-
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
-        if (channel == 0)
-            lstmL.process(buffer.getWritePointer(0), gainValue, buffer.getWritePointer(0), (int)numSamples);
-        else if (channel == 1)
-            lstmL.process(buffer.getWritePointer(1), gainValue, buffer.getWritePointer(1), (int)numSamples);
-    }
 }
 
 //==============================================================================

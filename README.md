@@ -6,7 +6,7 @@ Machine learning is used to train a model of the left (or mono) channel gain kno
 
 <p align=center>
   <picture>
-    <img src="./Assets/4000db.jpg" height="200"/>
+    <img src="./Assets/Akai_4000_DB-Prospekt-1977.jpg" width="1000"/>
   </picture>
 </p>
 

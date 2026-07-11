@@ -57,9 +57,9 @@ To train the model, you need to replace the configs in the `./Automated-GuitarAm
 cd ../Models
 cp Parameterization-Config.json ../Automated-GuitarAmpModelling/Configs
 ```
-At this point, it is recommended to install the `./Automated-GuitarAmpModelling/requirements.txt` dependencies in a new virtual environment:
+At this point, it is recommended to install the `./Automated-GuitarAmpModelling/requirements.txt` dependencies in a new virtual environment (mine is working fine with Python 3.8.7):
 ```
-cd ..
+cd ../Automated-GuitarAmpModelling/
 pip install -r requirements.txt 
 ```
 Preparing the data and creating the training instructions:
@@ -74,6 +74,16 @@ The LSTM layer needs to be configured with a hidden size of 20 (`./Automated-Gui
 
 
 ## Build plugin
+
+The plugin is being built through a simple CMake file, also provided by [RTNeural](https://github.com/jatinchowdhury18/RTNeural).
+
+First, we need to add JUCE to the workspace. The easiest way is to add it as a submodule:
+```
+git submodule add https://github.com/juce-framework/JUCE.git JUCE
+git submodule update --init --recursive
+```
+**Important note:** depending on the system you want to build for, you'll also need to set the VST3 format accordingly on the `./CMakeLists.txt` file. I am on Windows so I will use `set(FORMATS VST3 Standalone)`, but for example if you want to compile for macOS, use `set(FORMATS AU VST3)` instead.
+
 ```
 cmake -B cmake-build
 cmake --build cmake-build --config Release

@@ -40,7 +40,7 @@ Install the dependencies and process the data to split it into `train` and `test
 
 ```
 pip install -r requirements.txt 
-python data_processing.py
+python data_preprocessing.py
 ```
 
 At this point, navigate to the `Automated-GuitarAmpModelling` submodule and move the processed file (you can find them in the `Data/processed/` directory) into a folder named `Recordings/`:

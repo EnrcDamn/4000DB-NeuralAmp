@@ -25,7 +25,7 @@ def process(data_dir, files):
         splitted_data = audio_splitter(data)
         save_wav(os.path.join(out_dir, file+'_train.wav'), rate, splitted_data['data_train'])
         save_wav(os.path.join(out_dir, file+'_test.wav'), rate, splitted_data['data_test'])
-    print("Processing successfully completed!\n")
+    print("Processing successfully completed! Location: " + out_dir + "\n")
 
 def load_file(filename):
     try:
@@ -48,15 +48,17 @@ def audio_converter(audio):
     else:
         print('Unimplemented audio data type conversion...')
 
-def normalize(data):
+def normalize(data, target_rms=0.1):
     '''
-    Normalizes data to the range of [-1.0, 1.0].
-    Unused at the moment.
+    Scale signal to a consistent target power level (RMS).
+    0.1 is a reasonable default (roughly -20 dBFS).
     '''
-    data_max = max(data)
-    data_min = min(data)
-    data_norm = max(data_max,abs(data_min))
-    return data / data_norm
+    rms = np.sqrt(np.mean(data**2))
+    # Divide-by-zero guard
+    if rms == 0:
+        return data
+    scaled = data * (target_rms / rms)
+    return np.clip(scaled, -1.0, 1.0)
 
 def audio_splitter(data):
     '''

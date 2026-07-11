@@ -6,10 +6,7 @@ def collect_files(directory):
     files_list = []
     if not os.path.exists(directory):
         raise FileNotFoundError("Data folder not found: maybe wrong name?")
-    for _, _, files in os.walk(directory):
-        for file in files:
-            if file[-4:] == ".wav":
-                files_list.append(file)
+    files_list = [f for f in os.listdir(directory) if f.endswith(".wav")]
     print("Files successfully collected; starting processing...\n")
     return files_list
 
@@ -32,8 +29,7 @@ def load_file(filename):
         file_rate, file_data = wavfile.read(filename)
         return file_rate, file_data
     except FileNotFoundError:
-        print(["File Not Found At: " + filename])
-        return
+        raise FileNotFoundError("File not found: " + filename)
 
 def audio_converter(audio):
     '''
@@ -82,6 +78,3 @@ if __name__ == "__main__":
     DATA_DIR='./Data/'
     files = collect_files(DATA_DIR)
     process(DATA_DIR, files)
-
-# TODO: fix "TypeError: cannot unpack non-iterable NoneType object"
-#       occurring when out_dir is already filled with processed audio

@@ -14,7 +14,7 @@ add_subdirectory(JUCE)                      # If you've put JUCE in a subdirecto
 
 # Set the plugin formats you'll be building here.
 # Valid formats: AAX Unity VST AU AUv3 Standalone
-set(FORMATS AU VST3)
+set(FORMATS VST3 Standalone)
 
 juce_add_plugin(${PROJECT_NAME}
     COPY_PLUGIN_AFTER_BUILD TRUE
@@ -35,6 +35,9 @@ add_subdirectory(Source)
 include_directories(Source)
 add_subdirectory(Models)
 add_subdirectory(RTNeural)
+
+# Add embedded resources
+juce_add_binary_data(NeuralReelSaturatorAssets SOURCES Assets/akai4000db_background.png)
 
 # Build LV2 only on Linux
 if(UNIX AND NOT APPLE)
@@ -65,3 +68,6 @@ target_link_libraries (${PROJECT_NAME} PRIVATE
 
 
 target_link_libraries(${PROJECT_NAME} LINK_PUBLIC RTNeural)
+
+target_link_libraries(NeuralReelSaturator PRIVATE NeuralReelSaturatorAssets)
+target_link_libraries(${PROJECT_NAME} PRIVATE BinaryData)

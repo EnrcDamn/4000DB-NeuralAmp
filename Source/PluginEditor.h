@@ -10,6 +10,7 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+#include "TransparentLookAndFeel.h"
 
 //==============================================================================
 /**
@@ -29,6 +30,9 @@ private:
     // access the processor object that created it.
     NeuralAmpAudioProcessor& audioProcessor;
     juce::Image backgroundImage;
+
+    juce::Slider gainKnob;
+    TransparentLookAndFeel lookAndFeel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NeuralAmpAudioProcessorEditor)
 };

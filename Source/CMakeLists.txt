@@ -7,4 +7,6 @@ target_sources(NeuralReelSaturator PUBLIC
 	PluginProcessor.h
 	RTNN.cpp
 	RTNN.h
+	TransparentLookAndFeel.cpp
+	TransparentLookAndFeel.h
 )

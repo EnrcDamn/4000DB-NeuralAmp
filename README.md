@@ -87,7 +87,7 @@ Training the model:
 python dist_model_recnet.py -l RNN3-4000DB-Parameterized -eps 250 --seed 39 -is 2 
 ```
 The LSTM layer needs to be configured with a hidden size of 20 (`./Automated-GuitarAmpModelling/Configs/RNN3-4000DB-Parameterized.json`). The training instructions must then be modified to included the extra inputs to the model as `-is <parameters + audio channels>`. That is, the number of inputs to the model must be the number of parameters plus the number of audio channels. In our case:
-- prepared input WAVs are 2-channel: guitar input + one normalized parameter. So `-is 2` is correct.x
+- prepared input WAVs are 2-channel: guitar input + one normalized parameter. So `-is 2` is correct.
 - targets are mono, matching the default `-os 1`.
 
 

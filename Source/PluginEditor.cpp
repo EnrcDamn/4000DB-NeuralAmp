@@ -25,7 +25,7 @@ NeuralAmpAudioProcessorEditor::NeuralAmpAudioProcessorEditor (NeuralAmpAudioProc
         BinaryData::akai4000db_background_pngSize
     );
 
-    m_gainKnob.setSliderStyle(juce::Slider::Rotary);
+    m_gainKnob.setSliderStyle(juce::Slider::RotaryVerticalDrag);
     m_gainKnob.setRange(0.0, 1.0, 0.01);
     m_gainKnob.setNumDecimalPlacesToDisplay(2);
     // Fixed width keeps every displayed value within the same compact field.
@@ -83,7 +83,7 @@ void NeuralAmpAudioProcessorEditor::drawVuNeedle(juce::Graphics& g)
 
     juce::Point<float> const pivot {
         getWidth() * 0.5f,
-        getHeight() * 0.454f
+        getHeight() * 0.450f
     };
     auto const needleLength = getWidth() * 0.18f;
     juce::Point<float> const tip {

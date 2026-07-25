@@ -18,8 +18,8 @@ void TransparentLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
 
     auto centreX = x + width  * 0.5f;
     auto centreY = y + height * 0.5f;
-    const auto radius = juce::jmin(width, height) * 0.385f;
-    const auto indicatorRadius = radius * 0.8f; // We want it to be "inside" the knob
+    auto const radius = juce::jmin(width, height) * 0.385f;
+    auto const indicatorRadius = radius * 0.8f; // We want it to be "inside" the knob
 
     // Draw a white indicator dot at the end of the rotary path.
     juce::Point<float> tip (
@@ -28,11 +28,11 @@ void TransparentLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
     );
 
     // Fade from grey at either endpoint to white at the middle (top) position.
-    const auto midpointAmount = 1.0f - std::abs(2.0f * sliderPosProportional - 1.0f);
+    auto const midpointAmount = 1.0f - std::abs(2.0f * sliderPosProportional - 1.0f);
     g.setColour(juce::Colours::lightgrey.interpolatedWith(juce::Colours::white, midpointAmount));
 
     // Scale it depending on the knob size, with 6 px minimum. Size of the dot is 5% of the knob size.
-    const auto dotDiameter = juce::jmax(8.0f, juce::jmin(width, height) * 0.05f);
+    auto const dotDiameter = juce::jmax(8.0f, juce::jmin(width, height) * 0.05f);
 
     g.fillEllipse(
         tip.x - dotDiameter * 0.5f,
@@ -42,7 +42,7 @@ void TransparentLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, i
     );
 
     // Outline circle around tip
-    g.setColour(juce::Colours::darkgrey);
+    g.setColour(juce::Colours::black.interpolatedWith(juce::Colours::darkgrey, midpointAmount));
     g.drawEllipse(
         tip.x - dotDiameter * 0.5f,
         tip.y - dotDiameter * 0.5f,

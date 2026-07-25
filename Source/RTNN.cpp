@@ -11,6 +11,7 @@
 #include "RTNN.h"
 
 #include <algorithm>
+#include <cmath>
 #include <stdexcept>
 #include <vector>
 
@@ -125,9 +126,9 @@ bool RTNN::loadModel(const void* jsonData, std::size_t jsonSize)
         m_model.template get<1>().setWeights (denseWeights);
         m_model.template get<1>().setBias (denseBias.data());
 
-        // Weights are now loaded, but an LSTM also contains changing internal state.
-        // Resetting makes its hidden and cell states start at zero.
-        m_model.reset();
+        // Initialise the recurrent delay for the training rate. Hosts call
+        // prepare() again with their actual rate before audio processing.
+        prepare(m_trainingSampleRate);
 
         m_loaded = true;
         return true;
@@ -137,6 +138,20 @@ bool RTNN::loadModel(const void* jsonData, std::size_t jsonSize)
         m_lastError = exception.what();
         return false;
     }
+}
+
+void RTNN::prepare(double sampleRate)
+{
+    // RTNeural's recurrent correction supports target rates at or above the
+    // training rate. A ratio of 1.0 is the original, sample-exact behaviour.
+    auto const validSampleRate = std::isfinite(sampleRate) && sampleRate > 0.0
+                                   ? sampleRate
+                                   : m_trainingSampleRate;
+
+    auto const delaySamples = static_cast<float>(
+        std::max(validSampleRate, m_trainingSampleRate) / m_trainingSampleRate);
+
+    m_model.template get<0>().prepare(delaySamples);
 }
 
 void RTNN::reset() noexcept

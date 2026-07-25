@@ -112,7 +112,7 @@ void NeuralAmpAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBl
 
     for (auto& model : m_neuralModels)
     {
-        model.reset();
+        model.prepare(sampleRate);
     }
 
     // 20 ms linear smoothing

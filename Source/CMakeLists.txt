@@ -1,6 +1,6 @@
 #add_subdirectory(headless)
 
-target_sources(NeuralReelSaturator PUBLIC
+target_sources(${PROJECT_NAME} PUBLIC
 	PluginEditor.cpp
 	PluginEditor.h
 	PluginProcessor.cpp

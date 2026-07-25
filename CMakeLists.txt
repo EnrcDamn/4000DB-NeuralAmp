@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-set(PROJECT_NAME NeuralReelSaturator)
+set(PROJECT_NAME NeuralAmp)
 
 project(${PROJECT_NAME} VERSION 0.0.1)
 
@@ -17,6 +17,7 @@ add_subdirectory(JUCE)                      # If you've put JUCE in a subdirecto
 set(FORMATS VST3 Standalone)
 
 juce_add_plugin(${PROJECT_NAME}
+    COMPANY_NAME "enricodamiani"
     COPY_PLUGIN_AFTER_BUILD TRUE
     # VST3_COPY_DIR C:/Program Files/Common Files/VST3
     PLUGIN_MANUFACTURER_CODE Juce
@@ -37,7 +38,7 @@ add_subdirectory(Models)
 add_subdirectory(RTNeural)
 
 # Add embedded resources
-juce_add_binary_data(NeuralReelSaturatorAssets SOURCES Assets/akai4000db_background.png)
+juce_add_binary_data(NeuralAmpAssets SOURCES Assets/akai4000db_background.png)
 
 # Build LV2 only on Linux
 if(UNIX AND NOT APPLE)
@@ -69,5 +70,5 @@ target_link_libraries (${PROJECT_NAME} PRIVATE
 
 target_link_libraries(${PROJECT_NAME} LINK_PUBLIC RTNeural)
 
-target_link_libraries(NeuralReelSaturator PRIVATE NeuralReelSaturatorAssets)
+target_link_libraries(${PROJECT_NAME} PRIVATE NeuralAmpAssets)
 target_link_libraries(${PROJECT_NAME} PRIVATE BinaryData)

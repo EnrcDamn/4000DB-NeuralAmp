@@ -59,14 +59,22 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+    float getOutputMeterLevel() const noexcept;
+
+public:
     juce::AudioProcessorValueTreeState parameters;
 
 private:
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 
+private:
     std::array<RTNN, 2> m_neuralModels;
     std::atomic<float>* m_gainParameter = nullptr;
     juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> m_smoothedGain;
+    std::atomic<float> m_outputMeterLevel { 0.0f };
+    float m_meterEnvelopeSquared = 0.0f;
+    float m_meterAttackCoefficient = 0.0f;
+    float m_meterReleaseCoefficient = 0.0f;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NeuralAmpAudioProcessor)

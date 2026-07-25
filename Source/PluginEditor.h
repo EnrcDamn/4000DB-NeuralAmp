@@ -15,7 +15,8 @@
 //==============================================================================
 /**
 */
-class NeuralAmpAudioProcessorEditor  : public juce::AudioProcessorEditor
+class NeuralAmpAudioProcessorEditor  : public juce::AudioProcessorEditor,
+                                       private juce::Timer
 {
 public:
     NeuralAmpAudioProcessorEditor (NeuralAmpAudioProcessor&);
@@ -26,6 +27,9 @@ public:
     void resized() override;
 
 private:
+    void timerCallback() override;
+    void drawVuNeedle(juce::Graphics&);
+
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     NeuralAmpAudioProcessor& m_audioProcessor;
@@ -34,6 +38,7 @@ private:
     juce::Slider m_gainKnob;
     juce::AudioProcessorValueTreeState::SliderAttachment m_gainAttachment;
     TransparentLookAndFeel m_lookAndFeel;
+    float m_meterDb = -20.0f;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NeuralAmpAudioProcessorEditor)
 };

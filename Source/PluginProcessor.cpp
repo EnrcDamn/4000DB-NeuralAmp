@@ -118,12 +118,18 @@ void NeuralAmpAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBl
     // 20 ms linear smoothing
     m_smoothedGain.reset(sampleRate, 0.02);
     m_smoothedGain.setCurrentAndTargetValue(m_gainParameter->load());
+
+    // A VU meter reaches its steady reading in roughly 300 ms. The attack time
+    // constant below reaches 99% in that time; release is deliberately slower.
+    m_meterAttackCoefficient = std::exp(-1.0f / (0.065f * static_cast<float>(sampleRate)));
+    m_meterReleaseCoefficient = std::exp(-1.0f / (0.65f * static_cast<float>(sampleRate)));
+    m_meterEnvelopeSquared = 0.0f;
+    m_outputMeterLevel.store(0.0f, std::memory_order_relaxed);
 }
 
 void NeuralAmpAudioProcessor::releaseResources()
 {
-    // When playback stops, you can use this as an opportunity to free up any
-    // spare memory, etc.
+    m_outputMeterLevel.store(0.0f, std::memory_order_relaxed);
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -157,9 +163,9 @@ void NeuralAmpAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
     juce::ScopedNoDenormals noDenormals;
     juce::ignoreUnused(midiMessages);
 
-    const auto totalNumInputChannels = getTotalNumInputChannels();
-    const auto totalNumOutputChannels = getTotalNumOutputChannels();
-    const auto channelsToProcess = juce::jmin(totalNumInputChannels, static_cast<int>(m_neuralModels.size()));
+    auto const totalNumInputChannels = getTotalNumInputChannels();
+    auto const totalNumOutputChannels = getTotalNumOutputChannels();
+    auto const channelsToProcess = juce::jmin(totalNumInputChannels, static_cast<int>(m_neuralModels.size()));
 
     for (auto channel = totalNumInputChannels; channel < totalNumOutputChannels; ++channel)
     {
@@ -171,15 +177,36 @@ void NeuralAmpAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
 
     for (auto sample = 0; sample < buffer.getNumSamples(); ++sample)
     {
-        const auto gain = m_smoothedGain.getNextValue();
+        auto const gain = m_smoothedGain.getNextValue();
+        auto outputPower = 0.0f;
 
         for (auto channel = 0; channel < channelsToProcess; ++channel)
         {
             // Replace input with neural network output
-            channelData[channel][sample] = m_neuralModels[static_cast<std::size_t>(channel)]
-                                               .processSample(channelData[channel][sample], gain);
+            auto const output = m_neuralModels[static_cast<std::size_t>(channel)]
+                                    .processSample(channelData[channel][sample], gain);
+            channelData[channel][sample] = output;
+            outputPower += output * output;
         }
+
+        if (channelsToProcess > 0)
+        {
+            outputPower /= static_cast<float>(channelsToProcess);
+        }
+
+        auto const coefficient = outputPower > m_meterEnvelopeSquared
+                                   ? m_meterAttackCoefficient
+                                   : m_meterReleaseCoefficient;
+        m_meterEnvelopeSquared = coefficient * m_meterEnvelopeSquared
+                               + (1.0f - coefficient) * outputPower;
     }
+
+    m_outputMeterLevel.store(std::sqrt(m_meterEnvelopeSquared), std::memory_order_relaxed);
+}
+
+float NeuralAmpAudioProcessor::getOutputMeterLevel() const noexcept
+{
+    return m_outputMeterLevel.load(std::memory_order_relaxed);
 }
 
 //==============================================================================

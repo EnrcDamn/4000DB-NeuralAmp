@@ -8,6 +8,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "ModelData.h"
 
 //==============================================================================
 NeuralAmpAudioProcessor::NeuralAmpAudioProcessor()
@@ -20,9 +21,22 @@ NeuralAmpAudioProcessor::NeuralAmpAudioProcessor()
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
                        )
+     , parameters (*this, nullptr, "PARAMETERS", createParameterLayout())
+#else
+     : parameters (*this, nullptr, "PARAMETERS", createParameterLayout())
 #endif
 {
+    gainParameter = parameters.getRawParameterValue ("gain");
+    jassert (gainParameter != nullptr);
 
+    for (auto& model : neuralModels)
+    {
+        const auto loaded = model.loadModel (
+            ModelData::model_best_json,
+            static_cast<std::size_t> (ModelData::model_best_jsonSize));
+        jassertquiet (loaded);
+        juce::ignoreUnused (loaded);
+    }
 }
 
 NeuralAmpAudioProcessor::~NeuralAmpAudioProcessor()
@@ -152,15 +166,26 @@ juce::AudioProcessorEditor* NeuralAmpAudioProcessor::createEditor()
 //==============================================================================
 void NeuralAmpAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
+    if (auto xml = parameters.copyState().createXml())
+        copyXmlToBinary(*xml, destData);
 }
 
 void NeuralAmpAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
+    if (auto xml = getXmlFromBinary(data, sizeInBytes))
+        if (xml->hasTagName(parameters.state.getType()))
+            parameters.replaceState(juce::ValueTree::fromXml(*xml));
+}
+
+juce::AudioProcessorValueTreeState::ParameterLayout NeuralAmpAudioProcessor::createParameterLayout()
+{
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
+    layout.add(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID{ "gain", 1 },
+        "Gain",
+        juce::NormalisableRange<float>{ 0.0f, 1.0f, 0.01f },
+        0.0f));
+    return layout;
 }
 
 //==============================================================================

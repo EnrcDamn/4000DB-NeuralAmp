@@ -11,6 +11,8 @@
 #include <JuceHeader.h>
 #include "RTNN.h"
 
+#include <array>
+
 //==============================================================================
 /**
 */
@@ -57,8 +59,14 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+    juce::AudioProcessorValueTreeState parameters;
 
 private:
+    static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+
+    std::array<RTNN, 2> neuralModels;
+    std::atomic<float>* gainParameter = nullptr;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NeuralAmpAudioProcessor)
 };

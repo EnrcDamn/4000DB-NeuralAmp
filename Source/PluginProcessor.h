@@ -66,6 +66,7 @@ private:
 
     std::array<RTNN, 2> neuralModels;
     std::atomic<float>* gainParameter = nullptr;
+    juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> m_smoothedGain;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NeuralAmpAudioProcessor)

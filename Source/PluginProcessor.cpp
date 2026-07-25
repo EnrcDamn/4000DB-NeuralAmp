@@ -108,7 +108,16 @@ void NeuralAmpAudioProcessor::changeProgramName (int index, const juce::String& 
 //==============================================================================
 void NeuralAmpAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
+    juce::ignoreUnused(samplesPerBlock);
 
+    for (auto& model : neuralModels)
+    {
+        model.reset();
+    }
+
+    // 20 ms linear smoothing
+    m_smoothedGain.reset(sampleRate, 0.02);
+    m_smoothedGain.setCurrentAndTargetValue(gainParameter->load());
 }
 
 void NeuralAmpAudioProcessor::releaseResources()
@@ -146,10 +155,31 @@ bool NeuralAmpAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts
 void NeuralAmpAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels  = getTotalNumInputChannels();
-    auto totalNumOutputChannels = getTotalNumOutputChannels();
+    juce::ignoreUnused(midiMessages);
 
-    const int numSamples = buffer.getNumSamples();
+    const auto totalNumInputChannels = getTotalNumInputChannels();
+    const auto totalNumOutputChannels = getTotalNumOutputChannels();
+    const auto channelsToProcess = juce::jmin(totalNumInputChannels, static_cast<int>(neuralModels.size()));
+
+    for (auto channel = totalNumInputChannels; channel < totalNumOutputChannels; ++channel)
+    {
+        buffer.clear(channel, 0, buffer.getNumSamples());
+    }
+
+    m_smoothedGain.setTargetValue(gainParameter->load());
+    auto channelData = buffer.getArrayOfWritePointers();
+
+    for (auto sample = 0; sample < buffer.getNumSamples(); ++sample)
+    {
+        const auto gain = m_smoothedGain.getNextValue();
+
+        for (auto channel = 0; channel < channelsToProcess; ++channel)
+        {
+            // Replace input with neural network output
+            channelData[channel][sample] = neuralModels[static_cast<std::size_t>(channel)]
+                                               .processSample(channelData[channel][sample], gain);
+        }
+    }
 }
 
 //==============================================================================

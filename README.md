@@ -16,6 +16,18 @@ Taking inspiration from Neural DSP products, the goal of the project is to devel
 
 The model was trained at 44.1 kHz. At higher host sample rates, the plugin uses RTNeural's linearly interpolated recurrent sample-rate correction so the LSTM's time behavior remains tied to the training rate. The 44.1 kHz path uses an exact 1-sample recurrent delay. RTNeural does not support recurrent correction below the training rate, so lower host rates use the 44.1 kHz recurrence behavior.
 
+A free VST3 plugin is available for trial in releases.
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=i5kTCFLeWxk">
+    <img
+      src="https://img.youtube.com/vi/i5kTCFLeWxk/maxresdefault.jpg"
+      alt="Watch the Akai 4000DB Neural Amp plugin demonstration"
+      width="720"
+    />
+  </a>
+</p>
+
 # Step-to-step development
 
 For the training data, a 3-minute long audio of my clean guitar was recorded. The audio was passed through the device at five steps for the full range of the gain knob (0.0, 0.25, 0.50, 0.75, 1.0), resulting in five different output samples of 3 minutes each. It is important to rename every file with the correct parameter configuration in hundredths at the end (e.g. 0.0 -> `audio-000.wav`, 0.25 -> `audio-025.wav`, etc.). Open the `Models/Parameterization-Config.json` to have a better understanding of the correct filenames. The training model is an LSTM layer followed by a dense layer. 

@@ -64,8 +64,8 @@ public:
 private:
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 
-    std::array<RTNN, 2> neuralModels;
-    std::atomic<float>* gainParameter = nullptr;
+    std::array<RTNN, 2> m_neuralModels;
+    std::atomic<float>* m_gainParameter = nullptr;
     juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> m_smoothedGain;
 
     //==============================================================================

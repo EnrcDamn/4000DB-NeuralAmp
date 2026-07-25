@@ -26,10 +26,10 @@ NeuralAmpAudioProcessor::NeuralAmpAudioProcessor()
      : parameters (*this, nullptr, "PARAMETERS", createParameterLayout())
 #endif
 {
-    gainParameter = parameters.getRawParameterValue ("gain");
-    jassert (gainParameter != nullptr);
+    m_gainParameter = parameters.getRawParameterValue ("gain");
+    jassert (m_gainParameter != nullptr);
 
-    for (auto& model : neuralModels)
+    for (auto& model : m_neuralModels)
     {
         const auto loaded = model.loadModel (
             ModelData::model_best_json,
@@ -110,14 +110,14 @@ void NeuralAmpAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBl
 {
     juce::ignoreUnused(samplesPerBlock);
 
-    for (auto& model : neuralModels)
+    for (auto& model : m_neuralModels)
     {
         model.reset();
     }
 
     // 20 ms linear smoothing
     m_smoothedGain.reset(sampleRate, 0.02);
-    m_smoothedGain.setCurrentAndTargetValue(gainParameter->load());
+    m_smoothedGain.setCurrentAndTargetValue(m_gainParameter->load());
 }
 
 void NeuralAmpAudioProcessor::releaseResources()
@@ -159,14 +159,14 @@ void NeuralAmpAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
 
     const auto totalNumInputChannels = getTotalNumInputChannels();
     const auto totalNumOutputChannels = getTotalNumOutputChannels();
-    const auto channelsToProcess = juce::jmin(totalNumInputChannels, static_cast<int>(neuralModels.size()));
+    const auto channelsToProcess = juce::jmin(totalNumInputChannels, static_cast<int>(m_neuralModels.size()));
 
     for (auto channel = totalNumInputChannels; channel < totalNumOutputChannels; ++channel)
     {
         buffer.clear(channel, 0, buffer.getNumSamples());
     }
 
-    m_smoothedGain.setTargetValue(gainParameter->load());
+    m_smoothedGain.setTargetValue(m_gainParameter->load());
     auto channelData = buffer.getArrayOfWritePointers();
 
     for (auto sample = 0; sample < buffer.getNumSamples(); ++sample)
@@ -176,7 +176,7 @@ void NeuralAmpAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
         for (auto channel = 0; channel < channelsToProcess; ++channel)
         {
             // Replace input with neural network output
-            channelData[channel][sample] = neuralModels[static_cast<std::size_t>(channel)]
+            channelData[channel][sample] = m_neuralModels[static_cast<std::size_t>(channel)]
                                                .processSample(channelData[channel][sample], gain);
         }
     }

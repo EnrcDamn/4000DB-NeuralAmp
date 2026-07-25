@@ -28,11 +28,12 @@ public:
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
-    NeuralAmpAudioProcessor& audioProcessor;
-    juce::Image backgroundImage;
+    NeuralAmpAudioProcessor& m_audioProcessor;
+    juce::Image m_backgroundImage;
 
-    juce::Slider gainKnob;
-    TransparentLookAndFeel lookAndFeel;
+    juce::Slider m_gainKnob;
+    juce::AudioProcessorValueTreeState::SliderAttachment m_gainAttachment;
+    TransparentLookAndFeel m_lookAndFeel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NeuralAmpAudioProcessorEditor)
 };

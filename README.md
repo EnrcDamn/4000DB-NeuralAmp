@@ -6,7 +6,7 @@ Machine learning is used to train a model of the left (or mono) channel gain kno
 
 <p align=center>
   <picture>
-    <img src="./Assets/img.jpg" width="690"/>
+    <img src="./Assets/img.jpg" width="500"/>
   </picture>
 </p>
 
@@ -14,7 +14,9 @@ The training was made using the [GuitarML](https://github.com/GuitarML/Automated
 
 Taking inspiration from Neural DSP products, the goal of the project is to develop a basic machine learning plugin in a similar fashion, to model a highly non-linear amplification circuit.
 
-# How To Use
+The model was trained at 44.1 kHz. At higher host sample rates, the plugin uses RTNeural's linearly interpolated recurrent sample-rate correction so the LSTM's time behavior remains tied to the training rate. The 44.1 kHz path uses an exact 1-sample recurrent delay. RTNeural does not support recurrent correction below the training rate, so lower host rates use the 44.1 kHz recurrence behavior.
+
+# Step-to-step development
 
 For the training data, a 3-minute long audio of my clean guitar was recorded. The audio was passed through the device at five steps for the full range of the gain knob (0.0, 0.25, 0.50, 0.75, 1.0), resulting in five different output samples of 3 minutes each. It is important to rename every file with the correct parameter configuration in hundredths at the end (e.g. 0.0 -> `audio-000.wav`, 0.25 -> `audio-025.wav`, etc.). Open the `Models/Parameterization-Config.json` to have a better understanding of the correct filenames. The training model is an LSTM layer followed by a dense layer. 
 
@@ -87,6 +89,8 @@ git submodule add https://github.com/juce-framework/JUCE.git JUCE
 git submodule update --init --recursive
 ```
 **Important note:** depending on the system you want to build for, you'll also need to set the VST3 format accordingly on the `./CMakeLists.txt` file. I am on Windows so I will use `set(FORMATS VST3 Standalone)`, but for example if you want to compile for macOS, use `set(FORMATS AU VST3)` instead.
+
+The trained models appearing in `.\Automated-GuitarAmpModelling\Results` should be moved in the `.\Models` folder. By default, `Models\CMakeLists.txt` is using the `model_best.json` version (with the lowest val loss).
 
 ```
 cmake -B cmake-build

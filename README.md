@@ -47,7 +47,7 @@ cmake --build cmake-build --config Release
 
 ## Debug build with diagnostics
 
-Build with profiling and launch the viewer tool:
+Build with profiling and launch the [DiagnosticsViewer](https://github.com/EnrcDamn/DiagnosticsViewer) tool:
 
 ```powershell
 cmake -S . -B cmake-build "-DCMAKE_POLICY_VERSION_MINIMUM=3.5" -DDIAGNOSTICS=ON -DNEURALAMP_COPY_PLUGIN_AFTER_BUILD=ON

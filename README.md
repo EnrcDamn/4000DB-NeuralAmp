@@ -31,7 +31,7 @@ A free VST3 plugin is available for trial in releases. Youtube demo:
 
 ## Build
 
-The plugin is being built through a simple CMake file, also provided by [RTNeural](https://github.com/jatinchowdhury18/RTNeural).
+Requires CMake 3.22+ and a C++17 compiler; the diagnostics viewer also needs Python 3.9+.
 
 Add JUCE to the workspace. The easiest way is to add it as a submodule:
 ```
@@ -41,6 +41,20 @@ git submodule update --init --recursive
 **Important note:** depending on the system you want to build for, you'll also need to set the VST3 format accordingly on the `./CMakeLists.txt` file. I am on Windows so I will use `set(FORMATS VST3 Standalone)`, but for example if you want to compile for macOS, use `set(FORMATS AU VST3)` instead.
 
 ```
-cmake -B cmake-build
+cmake -B cmake-build "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
 cmake --build cmake-build --config Release
 ```
+
+## Debug build with diagnostics
+
+Build with profiling and launch the viewer tool:
+
+```powershell
+cmake -S . -B cmake-build "-DCMAKE_POLICY_VERSION_MINIMUM=3.5" -DDIAGNOSTICS=ON -DNEURALAMP_COPY_PLUGIN_AFTER_BUILD=ON
+cmake --build cmake-build --config RelWithDebInfo --parallel
+cmake --build cmake-build --target diagnostics_viewer
+```
+
+Run the VST3 in the DAW (or run the app in the adjacent `Standalone` folder) and select its session in the viewer.
+
+`DIAGNOSTICS=AUTO` (default) enables Debug only.

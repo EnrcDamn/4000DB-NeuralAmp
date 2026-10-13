@@ -10,6 +10,7 @@
 
 #include <JuceHeader.h>
 #include "RTNN.h"
+#include "Diagnostics/ProcessorDiagnostics.h"
 
 #include <array>
 
@@ -66,8 +67,11 @@ public:
 
 private:
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+    void processNeuralBlock(juce::AudioBuffer<float>& buffer, int channels) noexcept;
+    void updateOutputMeter(const juce::AudioBuffer<float>& buffer, int channels) noexcept;
 
 private:
+    ProcessorDiagnostics m_diagnostics;
     std::array<RTNN, 2> m_neuralModels;
     std::atomic<float>* m_gainParameter = nullptr;
     juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear> m_smoothedGain;

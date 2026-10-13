@@ -37,6 +37,7 @@ NeuralAmpAudioProcessor::NeuralAmpAudioProcessor()
         jassertquiet (loaded);
         juce::ignoreUnused (loaded);
     }
+    m_diagnostics.modelsLoaded(m_neuralModels);
 }
 
 NeuralAmpAudioProcessor::~NeuralAmpAudioProcessor()
@@ -108,8 +109,6 @@ void NeuralAmpAudioProcessor::changeProgramName (int index, const juce::String& 
 //==============================================================================
 void NeuralAmpAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    juce::ignoreUnused(samplesPerBlock);
-
     for (auto& model : m_neuralModels)
     {
         model.prepare(sampleRate);
@@ -125,11 +124,13 @@ void NeuralAmpAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBl
     m_meterReleaseCoefficient = std::exp(-1.0f / (0.65f * static_cast<float>(sampleRate)));
     m_meterEnvelopeSquared = 0.0f;
     m_outputMeterLevel.store(0.0f, std::memory_order_relaxed);
+    m_diagnostics.prepareToPlay(sampleRate, samplesPerBlock);
 }
 
 void NeuralAmpAudioProcessor::releaseResources()
 {
     m_outputMeterLevel.store(0.0f, std::memory_order_relaxed);
+    m_diagnostics.releaseResources();
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -160,6 +161,7 @@ bool NeuralAmpAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts
 
 void NeuralAmpAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
+    auto profile = m_diagnostics.beginBlock(buffer.getNumSamples(), buffer.getNumChannels());
     juce::ScopedNoDenormals noDenormals;
     juce::ignoreUnused(midiMessages);
 
@@ -167,31 +169,61 @@ void NeuralAmpAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
     auto const totalNumOutputChannels = getTotalNumOutputChannels();
     auto const channelsToProcess = juce::jmin(totalNumInputChannels, static_cast<int>(m_neuralModels.size()));
 
-    for (auto channel = totalNumInputChannels; channel < totalNumOutputChannels; ++channel)
     {
-        buffer.clear(channel, 0, buffer.getNumSamples());
+        [[maybe_unused]] const auto scope = profile.measure(ProcessorScope::controls);
+        for (auto channel = totalNumInputChannels; channel < totalNumOutputChannels; ++channel)
+        {
+            buffer.clear(channel, 0, buffer.getNumSamples());
+        }
+        m_smoothedGain.setTargetValue(m_gainParameter->load());
     }
 
-    m_smoothedGain.setTargetValue(m_gainParameter->load());
-    auto channelData = buffer.getArrayOfWritePointers();
-
-    for (auto sample = 0; sample < buffer.getNumSamples(); ++sample)
     {
-        auto const gain = m_smoothedGain.getNextValue();
-        auto outputPower = 0.0f;
+        [[maybe_unused]] const auto scope = profile.measure(ProcessorScope::neural);
+        processNeuralBlock(buffer, channelsToProcess);
+    }
+    {
+        [[maybe_unused]] const auto scope = profile.measure(ProcessorScope::meter);
+        updateOutputMeter(buffer, channelsToProcess);
+    }
+}
 
-        for (auto channel = 0; channel < channelsToProcess; ++channel)
+void NeuralAmpAudioProcessor::processNeuralBlock(juce::AudioBuffer<float>& buffer, int channels) noexcept
+{
+    // Fixed scratch space also handles callbacks larger than the prepared block size.
+    std::array<float, 256> gains;
+    for (int offset = 0; offset < buffer.getNumSamples();)
+    {
+        const auto count = juce::jmin(static_cast<int>(gains.size()), buffer.getNumSamples() - offset);
+        for (int sample = 0; sample < count; ++sample)
         {
-            // Replace input with neural network output
-            auto const output = m_neuralModels[static_cast<std::size_t>(channel)]
-                                    .processSample(channelData[channel][sample], gain);
-            channelData[channel][sample] = output;
+            gains[static_cast<std::size_t>(sample)] = m_smoothedGain.getNextValue();
+        }
+
+        for (int channel = 0; channel < channels; ++channel)
+        {
+            m_neuralModels[static_cast<std::size_t>(channel)].processBlock(
+                buffer.getWritePointer(channel, offset), gains.data(), count);
+        }
+        offset += count;
+    }
+}
+
+void NeuralAmpAudioProcessor::updateOutputMeter(const juce::AudioBuffer<float>& buffer, int channels) noexcept
+{
+    const auto channelData = buffer.getArrayOfReadPointers();
+    for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+    {
+        auto outputPower = 0.0f;
+        for (int channel = 0; channel < channels; ++channel)
+        {
+            const auto output = channelData[channel][sample];
             outputPower += output * output;
         }
 
-        if (channelsToProcess > 0)
+        if (channels > 0)
         {
-            outputPower /= static_cast<float>(channelsToProcess);
+            outputPower /= static_cast<float>(channels);
         }
 
         auto const coefficient = outputPower > m_meterEnvelopeSquared

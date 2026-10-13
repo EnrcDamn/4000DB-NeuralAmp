@@ -171,3 +171,11 @@ float RTNN::processSample (float audioSample, float gainParameter) noexcept
     // The training model uses skip=1, adding the first input to the output of the LSTM/dense stack.
     return m_model.forward(input) + audioSample;
 }
+
+void RTNN::processBlock(float* samples, const float* gains, int numSamples) noexcept
+{
+    for (int sample = 0; sample < numSamples; ++sample)
+    {
+        samples[sample] = processSample(samples[sample], gains[sample]);
+    }
+}

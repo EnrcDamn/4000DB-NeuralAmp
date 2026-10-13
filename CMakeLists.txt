@@ -1,9 +1,31 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.22)
 
 set(PROJECT_NAME NeuralAmp)
 
 project(${PROJECT_NAME} VERSION 0.0.1)
 
+set(DIAGNOSTICS "AUTO" CACHE STRING "Block diagnostics: AUTO (Debug only), ON or OFF")
+set_property(CACHE DIAGNOSTICS PROPERTY STRINGS AUTO ON OFF)
+option(NEURALAMP_COPY_PLUGIN_AFTER_BUILD "Copy the VST3 to the system plugin directory" ON)
+
+if(DIAGNOSTICS STREQUAL "AUTO")
+    set(diagnostics_enabled "$<CONFIG:Debug>")
+elseif(DIAGNOSTICS STREQUAL "ON")
+    set(diagnostics_enabled 1)
+elseif(DIAGNOSTICS STREQUAL "OFF")
+    set(diagnostics_enabled 0)
+else()
+    message(FATAL_ERROR "DIAGNOSTICS must be AUTO, ON or OFF")
+endif()
+
+if(NOT DIAGNOSTICS STREQUAL "OFF")
+    include(FetchContent)
+    FetchContent_Declare(diagnostics
+        GIT_REPOSITORY https://github.com/EnrcDamn/DiagnosticsViewer.git
+        GIT_TAG origin/main
+        GIT_REMOTE_UPDATE_STRATEGY CHECKOUT)
+    FetchContent_MakeAvailable(diagnostics)
+endif()
 
 # find_package(JUCE CONFIG REQUIRED)        # If you've installed JUCE to your system
 # or
@@ -18,7 +40,7 @@ set(FORMATS VST3 Standalone)
 
 juce_add_plugin(${PROJECT_NAME}
     COMPANY_NAME "enricodamiani"
-    COPY_PLUGIN_AFTER_BUILD TRUE
+    COPY_PLUGIN_AFTER_BUILD ${NEURALAMP_COPY_PLUGIN_AFTER_BUILD}
     # VST3_COPY_DIR C:/Program Files/Common Files/VST3
     PLUGIN_MANUFACTURER_CODE Juce
     PLUGIN_CODE Mute
@@ -54,12 +76,15 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
     JUCE_USE_CURL=0
     JUCE_VST3_CAN_REPLACE_VST2=0)
 
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+    DIAGNOSTICS_ENABLED=${diagnostics_enabled})
 
 target_link_libraries (${PROJECT_NAME} PRIVATE 
     # JUCE Modules
     juce::juce_audio_processors
     juce::juce_audio_plugin_client
     juce::juce_audio_utils
+    $<${diagnostics_enabled}:Diagnostics::Diagnostics>
     # juce::juce_dsp
 
     # Recommended flags

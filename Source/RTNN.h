@@ -19,7 +19,7 @@
  * Real-time wrapper for the conditioned Akai model.
  *
  * Model loading may allocate and must be done away from the audio thread.
- * processSample() and reset() do not allocate.
+ * processSample(), processBlock() and reset() do not allocate.
  */
 class RTNN
 {
@@ -33,6 +33,7 @@ public:
     void reset() noexcept;
 
     float processSample(float audioSample, float gainParameter) noexcept;
+    void processBlock(float* samples, const float* gains, int numSamples) noexcept;
 
     // Testing utilities
     bool isLoaded() const noexcept { return m_loaded; }

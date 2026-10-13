@@ -18,8 +18,9 @@ else()
     message(FATAL_ERROR "DIAGNOSTICS must be AUTO, ON or OFF")
 endif()
 
+include(FetchContent)
+
 if(NOT DIAGNOSTICS STREQUAL "OFF")
-    include(FetchContent)
     FetchContent_Declare(diagnostics
         GIT_REPOSITORY https://github.com/EnrcDamn/DiagnosticsViewer.git
         GIT_TAG origin/main
@@ -27,9 +28,12 @@ if(NOT DIAGNOSTICS STREQUAL "OFF")
     FetchContent_MakeAvailable(diagnostics)
 endif()
 
-# find_package(JUCE CONFIG REQUIRED)        # If you've installed JUCE to your system
-# or
-add_subdirectory(JUCE)                      # If you've put JUCE in a subdirectory called JUCE
+FetchContent_Declare(JUCE
+    GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
+    GIT_TAG origin/master
+    GIT_SHALLOW TRUE
+    GIT_REMOTE_UPDATE_STRATEGY CHECKOUT)
+FetchContent_MakeAvailable(JUCE)
 
 # If you are building a VST2 or AAX plugin, CMake needs to be told where to find these SDKs on your
 # system. This setup should be done before calling `juce_add_plugin`.

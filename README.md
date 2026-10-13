@@ -16,7 +16,7 @@ Taking inspiration from Neural DSP products, the goal of the project is to devel
 
 The model was trained at 44.1 kHz. At higher host sample rates, the plugin uses RTNeural's linearly interpolated recurrent sample-rate correction so the LSTM's time behavior remains tied to the training rate. The 44.1 kHz path uses an exact 1-sample recurrent delay. RTNeural does not support recurrent correction below the training rate, so lower host rates use the 44.1 kHz recurrence behavior.
 
-A free VST3 plugin is available for trial in releases. Youtube demo:
+A free VST3 plugin is available for trial in releases. YouTube demo:
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=i5kTCFLeWxk">
@@ -33,12 +33,11 @@ A free VST3 plugin is available for trial in releases. Youtube demo:
 
 Requires CMake 3.22+ and a C++17 compiler; the diagnostics viewer also needs Python 3.9+.
 
-Add JUCE to the workspace. The easiest way is to add it as a submodule:
+CMake fetches JUCE automatically. Initialize the remaining submodules:
 ```
-git submodule add https://github.com/juce-framework/JUCE.git JUCE
 git submodule update --init --recursive
 ```
-**Important note:** depending on the system you want to build for, you'll also need to set the VST3 format accordingly on the `./CMakeLists.txt` file. I am on Windows so I will use `set(FORMATS VST3 Standalone)`, but for example if you want to compile for macOS, use `set(FORMATS AU VST3)` instead.
+**Important note:** depending on the system you want to build for, you'll also need to set the VST3 format accordingly on the `./CMakeLists.txt` file. I am on Windows so I will use `set(FORMATS VST3 Standalone)`, but if you want to compile for macOS, use `set(FORMATS AU VST3)` instead.
 
 ```
 cmake -B cmake-build "-DCMAKE_POLICY_VERSION_MINIMUM=3.5"
@@ -55,6 +54,6 @@ cmake --build cmake-build --config RelWithDebInfo --parallel
 cmake --build cmake-build --target diagnostics_viewer
 ```
 
-Run the VST3 in the DAW (or run the app in the adjacent `Standalone` folder) and select its session in the viewer.
+Run the VST3 in the DAW (or run the app in Standalone mode) and select its session in the viewer.
 
-`DIAGNOSTICS=AUTO` (default) enables Debug only.
+`DIAGNOSTICS=AUTO` (default) enables `Debug` only.
